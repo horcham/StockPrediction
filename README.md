@@ -11,7 +11,7 @@ Tools for getting and modeling Chinese stocks
  - numpy 1.14.0
  - pandas 0.22.0
 
-## install
+## Install
 ```python
 git clone https://github.com/horcham/StockPrediction
 pip install -r requirements
