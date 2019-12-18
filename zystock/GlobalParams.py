@@ -105,7 +105,7 @@ STOCKIDLIST = [
     '002503', '603558', '603518', '600493', '002154', '002762', '600156', '603116'
 ]
 
-STOCKDATASAVEDIR = 'stock_data'
+RAWSTOCKDATASAVEDIR = './data/rawStockData'
 
 PICKINDEXLIST = {
     'MA3':True, 'MA5':True, 'MA6':True, 'MA10':True, 'MA12':True, 'MA20':True, \

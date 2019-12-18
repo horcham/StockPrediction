@@ -4,12 +4,18 @@ from .GlobalParams import *
 from urllib import request
 from .utils import *
 import os
+import sys
+
 
 class Stock(object):
     def __init__(self, stockid):
         self.id = stockid
         self.stock_url0 = 'http://quotes.money.163.com/service/chddata.html?code=0{}'
         self.stock_url1 = 'http://quotes.money.163.com/service/chddata.html?code=1{}'
+        self.calculatorIndex = IndexCalculator()
+        self.rawStockDataSaveDir = RAWSTOCKDATASAVEDIR
+        self.pickIndexList = PICKINDEXLIST
+
         self.data = self._UrlGetAndOpen()
         self._CleanAndRename()
         self._ltszbugprocess()
@@ -18,7 +24,7 @@ class Stock(object):
     def _UrlGetAndOpen(self):
         if self.id[0] == '6':
             url = self.stock_url0.format(self.id)
-        elif self.id[0] in ['0','3']:
+        elif self.id[0] in ['0', '3']:
             url = self.stock_url1.format(self.id)
         else:
             url = None
@@ -31,7 +37,7 @@ class Stock(object):
             self.fname = None
             print('{} download failed'.format(url))
         else:
-            self.fname = os.path.join(STOCKDATASAVEDIR, '{}.csv'.format(self.id))
+            self.fname = os.path.join(self.rawStockDataSaveDir, '{}.csv'.format(self.id))
             with open(self.fname, 'a') as f:
                 f.write(data)
             print('{} download successed, save at {}'.format(url, self.fname))
@@ -42,13 +48,14 @@ class Stock(object):
         '''
         Rename index and clean useless index
         '''
+
         data = self.data
-        rm_col_list = ['股票代码','名称','成交笔数']
-        new_colname = {'日期':'date', '收盘价':'close', '最高价':'high', \
-                       '最低价':'low', '开盘价':'open', '前收盘':'qsp', \
-                       '涨跌额':'zdy', '涨跌幅':'rate', '换手率':'hsl', \
-                       '成交量':'cjl', '成交金额':'cjje', '总市值':'zsz', \
-                       '流通市值':'ltsz'}
+        rm_col_list = ['股票代码', '名称', '成交笔数']
+        new_colname = {'日期': 'date', '收盘价': 'close', '最高价': 'high', \
+                       '最低价': 'low', '开盘价': 'open', '前收盘': 'qsp', \
+                       '涨跌额': 'zdy', '涨跌幅': 'rate', '换手率': 'hsl', \
+                       '成交量': 'cjl', '成交金额': 'cjje', '总市值': 'zsz', \
+                       '流通市值': 'ltsz'}
         for rm_col in rm_col_list:
             data = data.drop(rm_col, axis=1)
         data = data.rename(columns= new_colname)
@@ -61,21 +68,30 @@ class Stock(object):
         if len(rep_begin) == 0:
             pass
         else:
-            self.data = self.data.loc[0:rep_begin[0]-1,:]
+            self.data = self.data.loc[0:rep_begin[0]-1, :]
 
     def _isNone_process(self):
         data = self.data
-        colname_list = ['close','high','low','open','qsp','zdy','rate','hsl', \
-                        'cjl','cjje','zsz','ltsz']
+        colname_list = ['close', 'high', 'low', 'open', 'qsp', 'zdy', 'rate', 'hsl', \
+                        'cjl', 'cjje', 'zsz', 'ltsz']
         for colname in colname_list:
             d = data[colname]
-            data[colname] = d.where(~d.isin(['None']),0)
+            data[colname] = d.where(~d.isin(['None']), 0)
             data[colname] = data[colname].astype('float')
         self.data = data
 
+    def calculateIndex(self):
+        self.data = self.calculatorIndex.PickIndexs(self.data, self.pickIndexList)
+
+    def saveStockData(self, path):
+        self.data.to_csv(path)
+
+    def getRate(self):
+        pass
+
+
 if __name__ == '__main__':
     stock = Stock('600019')
-    indexcalc = IndexCalculator()
-    stock = indexcalc.PickIndexs(stock.data, PICKINDEXLIST)
-    print(stock)
+    stock.calculateIndex()
+    stock.saveStockData('./dataWithIndex/600019.csv')
 
