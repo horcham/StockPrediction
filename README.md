@@ -20,8 +20,10 @@ python setup.py install
 
 ## Quick Start
 ### 获取给定股票的所有历史数据
- - 在`GlobalParams.py`中的`STOCKDATASAVEDIR`中填入保存股票原始数据的地址。默认为`stock_data`(请使用绝对路径)
+ - 在`GlobalParams.py`中的`STOCKDATASAVEDIR`中填入保存股票原始数据的地址。默认为`./data/rawStockData`
+
  - 用给定股票代码，初始化`Stock`类。例如股票代码为`600019`（宝钢股份），则
+
    ```python
    import numpy as np
    import pandas as pd
@@ -31,7 +33,7 @@ python setup.py install
    ```
    其中，`close`：收盘价， `high`：最高价， `low`：最低价， `open`：开盘价， `qsp`：前收盘， `zdy`：涨跌额
    `rate`：涨跌幅， `hsl`：换手率， `cjl`：成交量， `cjje`：成交金额， `zsz`：总市值， `ltsz`：流通市值
-   
+
 ### 计算常用指标
   - 指标有：
     - MA3
@@ -61,11 +63,10 @@ python setup.py install
     - DEA
     - MACD
   - 在`GlobalParams.py`中的`PICKINDEXLIST`中，选择所需要的指标，需要的`True`，不需要的`False`。默认为全`True`。
-  - 初始化`IndexCalculator`类，并计算指标
   ```python
-  indexcalc = zys.IndexCalculator()   # 初始化`IndexCalculator`类
-  stockdata = indexcalc.PickIndexs(stock.data, zys.PICKINDEXLIST)  # 用`Stock`嗦获取的数据计算指标
-  print(stockdata)  # 输出数据与指标
+  stock.calculateIndex() # 用`Stock`获取的数据计算指标       
+  print(stock.data)  # 输出数据与指标
+  stock.saveStockData('yourPath/600019.csv') 
   ```
   ### run demo
   运行`python main.py`
